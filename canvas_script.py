@@ -6,16 +6,21 @@ import logging
 # Additionally, use a -v/--verbose and a -d/--debug marker to administrate this
 
 class CanvasAutomate:
-    def __init__(self, api_tokens='./json/access_tokens.json', rw_path='./json/info.json'):
-        with open(api_tokens) as handle:
-            tokens = json.load(handle)
+    def __init__(self, api_tokens='./json/access_tokens.json', rw_path='./json/info.json'):e
+        try:
+            with open(api_tokens) as handle:
+                tokens = json.load(handle)
 
-        self.cv = Canvas(tokens['canvas-api-access'][0], tokens['canvas-api-access'][1])
-        self.td = todoist.TodoistAPI(tokens['todoist-api-access'])
-        self.td.sync()
-        self.write_path = rw_path
-        with open(rw_path) as handle:
-            self.info = json.load(handle)
+            if token['canvas-api-access'] == [] or tokens['todoist-api-access'] == '':
+                raise Exception("check your credentials in the ./json/access_tokens.json file")
+            self.cv = Canvas(tokens['canvas-api-access'][0], tokens['canvas-api-access'][1])
+            self.td = todoist.TodoistAPI(tokens['todoist-api-access'])
+            self.td.sync()
+            self.write_path = rw_path
+            with open(rw_path) as handle:
+                self.info = json.load(handle)
+        except FileNotFoundError as e:
+            raise FileNotFoundError("check ./json/access_tokens.json or ./json/info.json")
 
 
     def __del__(self):
@@ -44,15 +49,17 @@ class CanvasAutomate:
 
     # does not return anything, but adds new Todoist projects for each favorite course
     # Adds the ids of these new projects in the info dict under the course id
-    # TODO: add a check to make sure the course is not already a project in Todoist
     def add_course_projects(self):
         courses = self.current_courses
         for i in courses:
+            if i.id in courses.keys():
+                continue
             proj = self.td.projects.add(i.name, color=i.course_color)
             self.td.commit()
             self.info[i.id]['project_id'] = proj.id
 
 
+    # Adds an assignment task to Todoist, then adds the assignment id to the info dict
     def add_asgn(self, course, asgn):
         if not verify_asgn(self.verify_asgn(course, asgn):
             return False
@@ -65,11 +72,13 @@ class CanvasAutomate:
         return True
 
 
+    # Verifies whether an assignment task has already been made in Todoist
+    # Returns False if the assignment has been made previously, and True otherwise
     def verify_asgn(self, course, asgn):
         course = self.info[course.id]
         if asgn.id in course['assignments']:
-            return True
-        return False
+            return False
+        return True
 
 
 if __name__ == '__main__':
