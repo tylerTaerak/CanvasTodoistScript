@@ -16,6 +16,8 @@ For the canvas-api-access section, there are two pieces of information needed.  
 
 For the todoist-api-access section, only an API key is needed.  It can be found by going to the Integrations tab in your accound, under the API token section. Copy and paste the token in the quotation marks in the access_token.json file.
 
-After adding this information to that file, you should be ready to run the script.  It can be run by typing
+You will also need two python libraries installed, `canvasapi` and `todoist-python`.  You can do this by running `pip install canvasapi` and `pip install todoist-python`
+
+After adding this information to that file and installing the necessary libraries, you should be ready to run the script.  It can be run by typing
 `py canvas_script.py`
 in terminal or command line
