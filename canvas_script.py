@@ -1,6 +1,7 @@
 from canvasapi import Canvas
 import todoist
 import json
+from pytz import timezone
 import logging
 
 
@@ -94,9 +95,10 @@ class CanvasAutomate:
         prj = self.info[str(course.id)]['project_id']
         strf = None
         if asgn.due_at_date is not None:
-            strf = asgn.due_at_date.strftime('%b %d')
-            if assgn.due_at_date.hour != 11 and assgn.due_at_date.minute != 59:
-                strf += assgn.due_at.strftime(' %I:%M %p')
+            new_datetime = asgn.due_at_date.astimezone(timezone('US/Mountain'))
+            strf = new_datetime.strftime('%b %d')
+            if new_datetime.hour != 11 and new_datetime.minute != 59:
+                strf += new_datetime.strftime(' %I:%M %p')
         self.td.items.add(asgn.name, due={'string': strf}, project_id=prj)
         self.info[str(course.id)]['assignments'].append(asgn.id)
         logging.info(f'Assignment: {asgn.name} added')
