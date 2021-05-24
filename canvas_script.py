@@ -97,7 +97,7 @@ class CanvasAutomate:
         if asgn.due_at_date is not None:
             new_datetime = asgn.due_at_date.astimezone(timezone('US/Mountain'))
             strf = new_datetime.strftime('%b %d')
-            if new_datetime.hour != 11 and new_datetime.minute != 59:
+            if new_datetime.hour != 23 and new_datetime.minute != 59:
                 strf += new_datetime.strftime(' %I:%M %p')
         self.td.items.add(asgn.name, due={'string': strf}, project_id=prj)
         self.info[str(course.id)]['assignments'].append(asgn.id)
