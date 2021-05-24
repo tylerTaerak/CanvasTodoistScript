@@ -93,9 +93,9 @@ class CanvasAutomate:
         print(f'Adding Assignment: {asgn.name}')
         prj = self.info[str(course.id)]['project_id']
         strf = None
-        if asgn.due_at is not None:
-            strf = asgn.due_at.strftime('%b %d')
-            if assgn.due_at.hour != 11 and assgn.due_at.minute != 59:
+        if asgn.due_at_date is not None:
+            strf = asgn.due_at_date.strftime('%b %d')
+            if assgn.due_at_date.hour != 11 and assgn.due_at_date.minute != 59:
                 strf += assgn.due_at.strftime(' %I:%M %p')
         self.td.items.add(asgn.name, due={'string': strf}, project_id=prj)
         self.info[str(course.id)]['assignments'].append(asgn.id)
