@@ -94,7 +94,7 @@ class CanvasAutomate:
         print(f'Adding Assignment: {asgn.name}')
         prj = self.info[str(course.id)]['project_id']
         strf = None
-        if asgn.due_at_date is not None:
+        if asgn.due_at is not None:
             new_datetime = asgn.due_at_date.astimezone(timezone('US/Mountain'))
             strf = new_datetime.strftime('%b %d')
             if new_datetime.hour != 23 and new_datetime.minute != 59:
