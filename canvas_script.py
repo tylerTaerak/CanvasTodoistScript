@@ -41,12 +41,14 @@ class CanvasAutomate:
     def __del__(self):
         logging.info('Finishing up...')
         self.td.commit()
+        print('Changes committed to Todoist')
         try:
             with open(self.write_path, 'w') as handle:
                 json.dump(self.info, handle)
         except Exception:
             print('deleted without saving info')
         logging.info('Complete. Deleting CanvasAutomate Object')
+        print('Script Complete.')
 
     # the top level function of the class, which will handle all the adding of assignments to the todo list
     def add_all_assignments_to_todoist(self):
