@@ -1,5 +1,5 @@
 from canvasapi import Canvas
-import todoist
+from todoist import TodoistAPI
 import json
 from pytz import timezone
 import logging
@@ -22,7 +22,7 @@ class CanvasAutomate:
             if tokens['canvas-api-access'] == [] or tokens['todoist-api-access'] == '':
                 raise Exception("check your credentials in the ./json/access_tokens.json file")
             self.cv = Canvas(tokens['canvas-api-access'][0], tokens['canvas-api-access'][1])
-            self.td = todoist.TodoistAPI(tokens['todoist-api-access'])
+            self.td = TodoistAPI(tokens['todoist-api-access'])
             self.td.sync()
             self.write_path = rw_path
 
@@ -31,7 +31,7 @@ class CanvasAutomate:
             if debug:
                 logging.basicConfig(level=logging.DEBUG)
 
-            with open(rw_path) as handle:
+            with open(rw_path, 'r') as handle:
                 self.info = json.load(handle)
 
         except FileNotFoundError as e:
@@ -40,15 +40,16 @@ class CanvasAutomate:
 
     def __del__(self):
         logging.info('Finishing up...')
-        self.td.commit()
-        print('Changes committed to Todoist')
         try:
+            self.td.commit()
+            print('Changes committed to Todoist')
             with open(self.write_path, 'w') as handle:
                 json.dump(self.info, handle)
         except Exception:
             print('deleted without saving info')
         logging.info('Complete. Deleting CanvasAutomate Object')
         print('Script Complete.')
+
 
     # the top level function of the class, which will handle all the adding of assignments to the todo list
     def add_all_assignments_to_todoist(self):
@@ -91,6 +92,7 @@ class CanvasAutomate:
     # Adds an assignment task to Todoist, then adds the assignment id to the info dict
     def add_asgn(self, course, asgn):
         if not self.verify_asgn(course, asgn):
+            print(f'Assignment {asgn.name} already added to Todoist (id: {asgn.id})')
             return False
         logging.info(f'adding Assignment: {asgn.name}')
         print(f'Adding Assignment: {asgn.name}')
@@ -101,7 +103,10 @@ class CanvasAutomate:
             strf = new_datetime.strftime('%b %d')
             if new_datetime.hour != 23 and new_datetime.minute != 59:
                 strf += new_datetime.strftime(' %I:%M %p')
-        self.td.items.add(asgn.name, due={'string': strf}, project_id=prj)
+        url = ''
+        if asgn.html_url is not None:
+            url = asgn.html_url
+        self.td.items.add(asgn.name, due={'string': strf}, project_id=prj, description=url)
         self.info[str(course.id)]['assignments'].append(asgn.id)
         logging.info(f'Assignment: {asgn.name} added')
         print(f'Assignment: {asgn.name} added')
@@ -112,7 +117,7 @@ class CanvasAutomate:
     # Returns False if the assignment has been made previously, and True otherwise
     def verify_asgn(self, course, asgn):
         course = self.info[str(course.id)]
-        if str(asgn.id) in course['assignments']:
+        if asgn.id in course['assignments']:
             return False
         return True
 
@@ -128,4 +133,5 @@ if __name__ == '__main__':
 
     cv = CanvasAutomate(api_tokens=args.api_access, rw_path=args.info_file, verbose=args.verbose, debug=args.debug)
     cv.add_all_assignments_to_todoist()
+
     del cv
